@@ -9,7 +9,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-
 namespace CyberSecurityPOE
 {
     public partial class MainWindow : Window
@@ -22,7 +21,7 @@ namespace CyberSecurityPOE
         private Dictionary<string, string> keywordResponses;
         private List<string> phishingTips;
         private List<string> activityLog = new List<string>();
-        private List<string> userTasks = new List<string>(); // ✅ Added this
+        private List<string> userTasks = new List<string>();
         private string? rememberedTopic = null;
 
         public MainWindow()
@@ -68,7 +67,7 @@ namespace CyberSecurityPOE
             ChatHistory.Items.Add("You: " + input);
             activityLog.Add($"You asked: {input}");
 
-            //  NLP /Reminder Detection 
+            // === NLP / Reminder Detection ===
             if (input.Contains("remind me") || input.Contains("set a reminder") ||
                 input.Contains("add a task") || input.Contains("reminder") ||
                 input.Contains("task") || input.Contains("to-do") || input.Contains("remember to"))
@@ -89,7 +88,7 @@ namespace CyberSecurityPOE
                 return;
             }
 
-            // ✅ Keyword match
+            // === Keyword Match ===
             foreach (var keyword in keywordResponses)
             {
                 if (input.Contains(keyword.Key))
@@ -102,7 +101,7 @@ namespace CyberSecurityPOE
                 }
             }
 
-            // ✅ Random phishing tip
+            // === Random Phishing Tip ===
             if (input.Contains("phishing"))
             {
                 string randomTip = phishingTips[new Random().Next(phishingTips.Count)];
@@ -111,19 +110,16 @@ namespace CyberSecurityPOE
                 return;
             }
 
-            // ❌ No match
+            // === No Match ===
             ChatHistory.Items.Add("Bot: Sorry, I don't understand. Try asking about phishing, passwords, scams, or privacy.");
             activityLog.Add("Bot could not answer.");
         }
 
         private void ShowActivityLog_Click(object sender, RoutedEventArgs e)
         {
-            ChatHistory.Items.Add("Bot: Here's a summary of recent actions:");
-            int count = 1;
-            foreach (string log in activityLog.GetRange(Math.Max(0, activityLog.Count - 10), Math.Min(10, activityLog.Count)))
-            {
-                ChatHistory.Items.Add($"{count++}. {log}");
-            }
+            // ✅ New GUI-based activity log window
+            ActivityLogWindow logWindow = new ActivityLogWindow(activityLog);
+            logWindow.Show();
         }
     }
 }
