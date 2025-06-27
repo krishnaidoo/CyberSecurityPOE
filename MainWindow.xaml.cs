@@ -13,7 +13,6 @@ using System.Windows.Shapes;
 namespace CyberSecurityPOE
 {
     public partial class MainWindow : Window
-
     {
         public void LogActivity(string message)
         {
@@ -23,20 +22,20 @@ namespace CyberSecurityPOE
         private Dictionary<string, string> keywordResponses;
         private List<string> phishingTips;
         private List<string> activityLog = new List<string>();
+        private List<string> userTasks = new List<string>(); // ✅ Added this
         private string? rememberedTopic = null;
 
         public MainWindow()
         {
             InitializeComponent();
             LoadChatbotData();
-
         }
+
         private void StartQuiz_Click(object sender, RoutedEventArgs e)
         {
             QuizWindow quizWindow = new QuizWindow();
             quizWindow.Show();
         }
-
 
         private void LoadChatbotData()
         {
@@ -69,7 +68,28 @@ namespace CyberSecurityPOE
             ChatHistory.Items.Add("You: " + input);
             activityLog.Add($"You asked: {input}");
 
-            // Quick keyword checks
+            //  NLP /Reminder Detection 
+            if (input.Contains("remind me") || input.Contains("set a reminder") ||
+                input.Contains("add a task") || input.Contains("reminder") ||
+                input.Contains("task") || input.Contains("to-do") || input.Contains("remember to"))
+            {
+                string taskText = input.Replace("remind me to", "")
+                                       .Replace("set a reminder to", "")
+                                       .Replace("add a task to", "")
+                                       .Replace("remember to", "")
+                                       .Trim();
+
+                if (string.IsNullOrWhiteSpace(taskText))
+                    taskText = "Unnamed Task";
+
+                userTasks.Add(taskText);
+                activityLog.Add($"{DateTime.Now:T} - NLP Task Added: {taskText}");
+
+                ChatHistory.Items.Add($"Bot: Got it! I’ve added a task to: '{taskText}'");
+                return;
+            }
+
+            // ✅ Keyword match
             foreach (var keyword in keywordResponses)
             {
                 if (input.Contains(keyword.Key))
@@ -82,7 +102,7 @@ namespace CyberSecurityPOE
                 }
             }
 
-            // Special case for phishing
+            // ✅ Random phishing tip
             if (input.Contains("phishing"))
             {
                 string randomTip = phishingTips[new Random().Next(phishingTips.Count)];
@@ -91,7 +111,7 @@ namespace CyberSecurityPOE
                 return;
             }
 
-            // No matches
+            // ❌ No match
             ChatHistory.Items.Add("Bot: Sorry, I don't understand. Try asking about phishing, passwords, scams, or privacy.");
             activityLog.Add("Bot could not answer.");
         }
